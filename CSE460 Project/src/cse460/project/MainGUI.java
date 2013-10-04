@@ -4,6 +4,9 @@
  */
 package cse460.project;
 
+import java.text.DecimalFormat;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author Justin
@@ -19,10 +22,13 @@ public class MainGUI extends javax.swing.JFrame {
     private double billTotal;
     private double billDeductions;
     private double tax;
+    private double tipTotal;
+    private double tipRate;
     private double minTipPercent;
     private double maxTipPercent;
     private boolean includeTax;
     private boolean includeDeductions;
+    private DecimalFormat df;
     public MainGUI() {
         currentTab = 1;
         numGuests = 1;
@@ -30,10 +36,13 @@ public class MainGUI extends javax.swing.JFrame {
         billTotal = 0;
         billDeductions = 0;
         tax = 0;
+        tipRate = 20;
+        tipTotal = 0;
         minTipPercent = 0;
         maxTipPercent = 40;
-        includeTax = true;
+        includeTax = false;
         includeDeductions = true;
+        df = new DecimalFormat("0.00");
         initComponents();
     }
 
@@ -49,7 +58,7 @@ public class MainGUI extends javax.swing.JFrame {
         includeTaxGroup = new javax.swing.ButtonGroup();
         includeDeductionsGroup = new javax.swing.ButtonGroup();
         tabPanes = new javax.swing.JTabbedPane();
-        tipTailoringPanel = new javax.swing.JPanel();
+        tipConfigPanel = new javax.swing.JPanel();
         label1 = new java.awt.Label();
         label2 = new java.awt.Label();
         label3 = new java.awt.Label();
@@ -68,7 +77,7 @@ public class MainGUI extends javax.swing.JFrame {
         numGuestsInput = new javax.swing.JTextField();
         label9 = new java.awt.Label();
         label10 = new java.awt.Label();
-        jSlider1 = new javax.swing.JSlider();
+        qosSlider = new javax.swing.JSlider();
         billTotalInput = new javax.swing.JTextField();
         label11 = new java.awt.Label();
         label12 = new java.awt.Label();
@@ -90,7 +99,8 @@ public class MainGUI extends javax.swing.JFrame {
         perPersonTipResultLabel = new java.awt.Label();
         billAndTipTotalLabel = new java.awt.Label();
         label18 = new java.awt.Label();
-        tipConfigPanel = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        tipTailoringPanel = new javax.swing.JPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -113,8 +123,28 @@ public class MainGUI extends javax.swing.JFrame {
         label6.setText("The tip base consists of: the Bill Total, Tax, and Items Deducted from bill (discounts, refunds...)");
 
         minTipPercentInput.setText("0.00");
+        minTipPercentInput.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                minTipPercentInputActionPerformed(evt);
+            }
+        });
+        minTipPercentInput.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                minTipPercentInputFocusLost(evt);
+            }
+        });
 
         maxTipPercentInput.setText("0.00");
+        maxTipPercentInput.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                maxTipPercentInputActionPerformed(evt);
+            }
+        });
+        maxTipPercentInput.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                maxTipPercentInputFocusLost(evt);
+            }
+        });
 
         label7.setText("The tip base is the items of the bill used to determine the tip amount.");
 
@@ -129,9 +159,16 @@ public class MainGUI extends javax.swing.JFrame {
         });
 
         includeTaxGroup.add(includeTaxOffButton);
+        includeTaxOffButton.setSelected(true);
         includeTaxOffButton.setText("Off");
+        includeTaxOffButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                includeTaxOffButtonActionPerformed(evt);
+            }
+        });
 
         includeDeductionsGroup.add(includeDeductionsOnButton);
+        includeDeductionsOnButton.setSelected(true);
         includeDeductionsOnButton.setText("On");
         includeDeductionsOnButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -141,34 +178,39 @@ public class MainGUI extends javax.swing.JFrame {
 
         includeDeductionsGroup.add(includeDeductionsOffButton);
         includeDeductionsOffButton.setText("Off");
+        includeDeductionsOffButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                includeDeductionsOffButtonActionPerformed(evt);
+            }
+        });
 
-        javax.swing.GroupLayout tipTailoringPanelLayout = new javax.swing.GroupLayout(tipTailoringPanel);
-        tipTailoringPanel.setLayout(tipTailoringPanelLayout);
-        tipTailoringPanelLayout.setHorizontalGroup(
-            tipTailoringPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(tipTailoringPanelLayout.createSequentialGroup()
+        javax.swing.GroupLayout tipConfigPanelLayout = new javax.swing.GroupLayout(tipConfigPanel);
+        tipConfigPanel.setLayout(tipConfigPanelLayout);
+        tipConfigPanelLayout.setHorizontalGroup(
+            tipConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(tipConfigPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(tipTailoringPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(tipConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(label6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(label2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(label1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(tipTailoringPanelLayout.createSequentialGroup()
-                        .addGroup(tipTailoringPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(tipConfigPanelLayout.createSequentialGroup()
+                        .addGroup(tipConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(label4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(label3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(58, 58, 58)
-                        .addGroup(tipTailoringPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addGroup(tipConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(maxTipPercentInput)
                             .addComponent(minTipPercentInput, javax.swing.GroupLayout.DEFAULT_SIZE, 44, Short.MAX_VALUE)))
                     .addComponent(label7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(tipTailoringPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addGroup(tipTailoringPanelLayout.createSequentialGroup()
+                    .addGroup(tipConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addGroup(tipConfigPanelLayout.createSequentialGroup()
                             .addComponent(label5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(includeDeductionsOnButton)
                             .addGap(18, 18, 18)
                             .addComponent(includeDeductionsOffButton))
-                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, tipTailoringPanelLayout.createSequentialGroup()
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, tipConfigPanelLayout.createSequentialGroup()
                             .addComponent(label8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGap(64, 64, 64)
                             .addComponent(includeTaxOnButton)
@@ -176,19 +218,19 @@ public class MainGUI extends javax.swing.JFrame {
                             .addComponent(includeTaxOffButton))))
                 .addContainerGap(128, Short.MAX_VALUE))
         );
-        tipTailoringPanelLayout.setVerticalGroup(
-            tipTailoringPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(tipTailoringPanelLayout.createSequentialGroup()
+        tipConfigPanelLayout.setVerticalGroup(
+            tipConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(tipConfigPanelLayout.createSequentialGroup()
                 .addGap(19, 19, 19)
                 .addComponent(label1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(1, 1, 1)
                 .addComponent(label2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(tipTailoringPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(tipConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(label3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(minTipPercentInput, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(tipTailoringPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(tipConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(label4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(maxTipPercentInput, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
@@ -196,33 +238,63 @@ public class MainGUI extends javax.swing.JFrame {
                 .addGap(2, 2, 2)
                 .addComponent(label6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(tipTailoringPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(tipConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(label8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(tipTailoringPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addGroup(tipConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(includeTaxOnButton)
                         .addComponent(includeTaxOffButton)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 31, Short.MAX_VALUE)
-                .addGroup(tipTailoringPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(tipConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(label5, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, tipTailoringPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, tipConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(includeDeductionsOnButton)
                         .addComponent(includeDeductionsOffButton)))
-                .addGap(31, 31, 31))
+                .addContainerGap(222, Short.MAX_VALUE))
         );
 
-        tabPanes.addTab("Tip Tailoring", tipTailoringPanel);
+        tabPanes.addTab("Configuring Tip Items", tipConfigPanel);
 
         numGuestsInput.setHorizontalAlignment(javax.swing.JTextField.TRAILING);
         numGuestsInput.setText("1");
+        numGuestsInput.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                numGuestsInputActionPerformed(evt);
+            }
+        });
+        numGuestsInput.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                numGuestsInputFocusLost(evt);
+            }
+        });
 
         label9.setText("Quality of Service");
 
         label10.setText("Number of Guests");
 
-        jSlider1.setValue(50);
+        qosSlider.setValue(50);
+        qosSlider.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                qosSliderStateChanged(evt);
+            }
+        });
+        qosSlider.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                qosSliderFocusLost(evt);
+            }
+        });
 
         billTotalInput.setHorizontalAlignment(javax.swing.JTextField.TRAILING);
         billTotalInput.setText("0.00");
+        billTotalInput.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                billTotalInputActionPerformed(evt);
+            }
+        });
+        billTotalInput.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                billTotalInputFocusLost(evt);
+            }
+        });
 
         label11.setText("Bill Total");
 
@@ -230,11 +302,31 @@ public class MainGUI extends javax.swing.JFrame {
 
         billDeductionsInput.setHorizontalAlignment(javax.swing.JTextField.TRAILING);
         billDeductionsInput.setText("0.00");
+        billDeductionsInput.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                billDeductionsInputActionPerformed(evt);
+            }
+        });
+        billDeductionsInput.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                billDeductionsInputFocusLost(evt);
+            }
+        });
 
         label13.setText("Tax");
 
         taxInput.setHorizontalAlignment(javax.swing.JTextField.TRAILING);
         taxInput.setText("0.00");
+        taxInput.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                taxInputActionPerformed(evt);
+            }
+        });
+        taxInput.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                taxInputFocusLost(evt);
+            }
+        });
 
         label14.setText("$");
 
@@ -266,6 +358,9 @@ public class MainGUI extends javax.swing.JFrame {
 
         label18.setText("Tip Rate");
 
+        jLabel1.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        jLabel1.setText("Tip Splitting Calculator");
+
         javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
         mainPanel.setLayout(mainPanelLayout);
         mainPanelLayout.setHorizontalGroup(
@@ -284,7 +379,7 @@ public class MainGUI extends javax.swing.JFrame {
                     .addComponent(label18, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jSlider1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(qosSlider, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainPanelLayout.createSequentialGroup()
                         .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(label16, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -312,19 +407,25 @@ public class MainGUI extends javax.swing.JFrame {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(label25, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
                     .addComponent(numGuestsInput, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(412, 412, 412))
+                .addGap(484, 484, 484))
+            .addGroup(mainPanelLayout.createSequentialGroup()
+                .addGap(252, 252, 252)
+                .addComponent(jLabel1)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         mainPanelLayout.setVerticalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(mainPanelLayout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(34, 34, 34)
+                .addComponent(jLabel1)
+                .addGap(37, 37, 37)
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(label10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(numGuestsInput, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(label9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jSlider1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(qosSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(mainPanelLayout.createSequentialGroup()
@@ -372,23 +473,23 @@ public class MainGUI extends javax.swing.JFrame {
                                 .addComponent(label21, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(label24, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))))
-                .addContainerGap(15, Short.MAX_VALUE))
+                .addContainerGap(105, Short.MAX_VALUE))
         );
 
-        tabPanes.addTab("Tip Splitting Calculator", mainPanel);
+        tabPanes.addTab("Bill Entry Screen", mainPanel);
 
-        javax.swing.GroupLayout tipConfigPanelLayout = new javax.swing.GroupLayout(tipConfigPanel);
-        tipConfigPanel.setLayout(tipConfigPanelLayout);
-        tipConfigPanelLayout.setHorizontalGroup(
-            tipConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        javax.swing.GroupLayout tipTailoringPanelLayout = new javax.swing.GroupLayout(tipTailoringPanel);
+        tipTailoringPanel.setLayout(tipTailoringPanelLayout);
+        tipTailoringPanelLayout.setHorizontalGroup(
+            tipTailoringPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 657, Short.MAX_VALUE)
         );
-        tipConfigPanelLayout.setVerticalGroup(
-            tipConfigPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 298, Short.MAX_VALUE)
+        tipTailoringPanelLayout.setVerticalGroup(
+            tipTailoringPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 465, Short.MAX_VALUE)
         );
 
-        tabPanes.addTab("Configuring Tip Items", tipConfigPanel);
+        tabPanes.addTab("Tip Tailoring", tipTailoringPanel);
 
         tabPanes.setSelectedIndex(1);
 
@@ -405,8 +506,8 @@ public class MainGUI extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(51, 51, 51)
-                .addComponent(tabPanes, javax.swing.GroupLayout.PREFERRED_SIZE, 326, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(94, Short.MAX_VALUE))
+                .addComponent(tabPanes, javax.swing.GroupLayout.PREFERRED_SIZE, 493, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(40, Short.MAX_VALUE))
         );
 
         pack();
@@ -414,11 +515,13 @@ public class MainGUI extends javax.swing.JFrame {
 
     
     private void includeTaxOnButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_includeTaxOnButtonActionPerformed
-        // TODO add your handling code here:
+        JOptionPane.showMessageDialog(rootPane, "Tax is now included in tip base.");
+        includeTax = true;
     }//GEN-LAST:event_includeTaxOnButtonActionPerformed
 
     private void includeDeductionsOnButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_includeDeductionsOnButtonActionPerformed
-        // TODO add your handling code here:
+        JOptionPane.showMessageDialog(rootPane, "Deductions are now included in tip base.");
+        includeDeductions = true;
     }//GEN-LAST:event_includeDeductionsOnButtonActionPerformed
 
     private void tabPanesStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_tabPanesStateChanged
@@ -430,9 +533,390 @@ public class MainGUI extends javax.swing.JFrame {
         {
             updateConfigTab();
         }
+        else if(currentTab == 1)
+        {
+            updateBillAndTipTotal();
+        }
         System.out.println(oldTab + " " + currentTab);
     }//GEN-LAST:event_tabPanesStateChanged
 
+    private void billTotalInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_billTotalInputActionPerformed
+        try
+        {
+            double tempTotal = Double.parseDouble(billTotalInput.getText());
+            if(tempTotal < 0)
+            {
+                JOptionPane.showMessageDialog(rootPane, "Bill total must be non-negative.");
+                billTotalInput.setText("0.00");
+            }
+            else
+            {
+                billTotal = tempTotal;
+                updateBillAndTipTotal();
+        
+            }
+        }
+        catch(NumberFormatException e)
+        {
+           // System.out.println("input must be a number");
+            JOptionPane.showMessageDialog(rootPane, "Bill total must be non-negative number.");
+            billTotalInput.setText("0.00");
+        }
+
+    }//GEN-LAST:event_billTotalInputActionPerformed
+
+    private void billTotalInputFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_billTotalInputFocusLost
+        try
+        {
+            double tempTotal = Double.parseDouble(billTotalInput.getText());
+            if(tempTotal < 0)
+            {
+                JOptionPane.showMessageDialog(rootPane, "Bill total must be non-negative.");
+                billTotalInput.setText("0");
+            }
+            else
+            {
+                billTotal = tempTotal;
+                updateBillAndTipTotal();
+        
+            }
+        }
+        catch(NumberFormatException e)
+        {
+           // System.out.println("input must be a number");
+            JOptionPane.showMessageDialog(rootPane, "Bill total must be non-negative number.");
+            billTotalInput.setText("0.00");
+        }
+    }//GEN-LAST:event_billTotalInputFocusLost
+
+    private void numGuestsInputFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_numGuestsInputFocusLost
+        try
+        {
+            int tempGuests = Integer.parseInt(numGuestsInput.getText());
+
+            if(tempGuests < 1 || tempGuests > 99)
+            {
+                JOptionPane.showMessageDialog(rootPane, "Number of guests must be an integer between 1 and 99 (inclusive)");
+                numGuestsInput.setText("1");
+            }
+            else
+            {
+                numGuests = tempGuests;
+                updateBillAndTipTotal();
+            }
+        }
+        catch(NumberFormatException e)
+        {
+            JOptionPane.showMessageDialog(rootPane, "Number of guests must be an integer between 1 and 99 (inclusive)");
+            numGuestsInput.setText("1");
+        }
+    }//GEN-LAST:event_numGuestsInputFocusLost
+
+    private void billDeductionsInputFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_billDeductionsInputFocusLost
+        try
+        {
+            double tempDeductions = Double.parseDouble(billDeductionsInput.getText());
+            if(tempDeductions < 0 )
+            {
+                JOptionPane.showMessageDialog(rootPane, "Bill deductions must be non-negative.");
+                billDeductionsInput.setText("0.00");
+            }
+            else if(tempDeductions > billTotal)
+            {
+                JOptionPane.showMessageDialog(rootPane, "Bill deductions cannot exceed the bill total.");
+                billDeductionsInput.setText("0.00");
+            }
+            else
+            {
+                billDeductions = tempDeductions;
+                updateBillAndTipTotal();
+            }
+        }
+        catch(NumberFormatException e)
+        {
+            JOptionPane.showMessageDialog(rootPane, "Bill deductions must be a non-negative number.");
+            billDeductionsInput.setText("0.00");
+        }
+    }//GEN-LAST:event_billDeductionsInputFocusLost
+
+    private void taxInputFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_taxInputFocusLost
+        try
+        {
+            double tempTax = Double.parseDouble(taxInput.getText());
+            if(tempTax < 0 )
+            {
+                JOptionPane.showMessageDialog(rootPane, "Tax must be non-negative.");
+                taxInput.setText("0.00");
+            }
+            else
+            {
+                if(tempTax > billTotal)
+                {
+                    JOptionPane.showMessageDialog(rootPane, "Warning: tax exceeds total bill value.");
+                }
+                tax = tempTax;
+                updateBillAndTipTotal();
+            }
+        }
+        catch(NumberFormatException e)
+        {
+            JOptionPane.showMessageDialog(rootPane, "Tax must be a non-negative number.");
+            taxInput.setText("0.00");
+        }
+    }//GEN-LAST:event_taxInputFocusLost
+
+    private void billDeductionsInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_billDeductionsInputActionPerformed
+        try
+        {
+            double tempDeductions = Double.parseDouble(billDeductionsInput.getText());
+            if(tempDeductions < 0 )
+            {
+                JOptionPane.showMessageDialog(rootPane, "Bill deductions must be non-negative.");
+                billDeductionsInput.setText("0.00");
+            }
+            else if(tempDeductions > billTotal)
+            {
+                JOptionPane.showMessageDialog(rootPane, "Bill deductions cannot exceed the bill total.");
+                billDeductionsInput.setText("0.00");
+            }
+            else
+            {
+                billDeductions = tempDeductions;
+                updateBillAndTipTotal();
+            }
+        }
+        catch(NumberFormatException e)
+        {
+            JOptionPane.showMessageDialog(rootPane, "Bill deductions must be a non-negative value.");
+            billDeductionsInput.setText("0.00");
+        }
+    }//GEN-LAST:event_billDeductionsInputActionPerformed
+
+    private void taxInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_taxInputActionPerformed
+        try
+        {
+            double tempTax = Double.parseDouble(taxInput.getText());
+            if(tempTax < 0 )
+            {
+                JOptionPane.showMessageDialog(rootPane, "Tax must be non-negative.");
+                taxInput.setText("0.00");
+            }
+
+            else
+            {
+                if(tempTax > billTotal)
+                {
+                    JOptionPane.showMessageDialog(rootPane, "Warning: tax exceeds total bill value.");
+                }
+                tax = tempTax;
+                updateBillAndTipTotal();
+            }
+        }
+        catch(NumberFormatException e)
+        {
+            JOptionPane.showMessageDialog(rootPane, "Tax must be a non-negative number.");
+            taxInput.setText("0.00");
+        }
+    }//GEN-LAST:event_taxInputActionPerformed
+
+    private void numGuestsInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_numGuestsInputActionPerformed
+        try
+        {
+            int tempGuests = Integer.parseInt(numGuestsInput.getText());
+
+            if(tempGuests < 1 || tempGuests > 99)
+            {
+                JOptionPane.showMessageDialog(rootPane, "Number of guests must be an integer between 1 and 99 (inclusive)");
+                numGuestsInput.setText("1");
+            }
+            else
+            {
+                numGuests = tempGuests;
+                updateBillAndTipTotal();
+            }
+        }
+        catch(NumberFormatException e)
+        {
+            JOptionPane.showMessageDialog(rootPane, "Number of guests must be an integer between 1 and 99 (inclusive)");
+            numGuestsInput.setText("1");
+        }
+    }//GEN-LAST:event_numGuestsInputActionPerformed
+
+    private void qosSliderFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_qosSliderFocusLost
+        updateTipRate();
+    }//GEN-LAST:event_qosSliderFocusLost
+
+    private void includeTaxOffButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_includeTaxOffButtonActionPerformed
+        JOptionPane.showMessageDialog(rootPane, "Tax is no longer included in tip base.");
+        includeTax = false;
+    }//GEN-LAST:event_includeTaxOffButtonActionPerformed
+
+    private void includeDeductionsOffButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_includeDeductionsOffButtonActionPerformed
+        JOptionPane.showMessageDialog(rootPane, "Deductions is no longer included in tip base.");
+        includeDeductions = false;
+    }//GEN-LAST:event_includeDeductionsOffButtonActionPerformed
+
+    private void minTipPercentInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_minTipPercentInputActionPerformed
+        try
+        {
+            double tempPercent = Double.parseDouble(minTipPercentInput.getText());
+
+            if(tempPercent < 0)
+            {
+                JOptionPane.showMessageDialog(rootPane, "Minimum tip percent must be a non-negative number.");
+                resetTipPercent();
+            }
+            else
+            {
+                if(tempPercent > maxTipPercent)
+                {
+                    JOptionPane.showMessageDialog(rootPane, "Minimum tip percent cannot exceed maximum tip percent.");
+                    resetTipPercent();
+                }
+                else
+                {
+                    minTipPercent = tempPercent;
+                }
+            }
+        }
+        catch(NumberFormatException e)
+        {
+            JOptionPane.showMessageDialog(rootPane, "Minimum tip percent must be a non-negative number.");
+            resetTipPercent();
+        }
+    }//GEN-LAST:event_minTipPercentInputActionPerformed
+
+    private void maxTipPercentInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_maxTipPercentInputActionPerformed
+         try
+        {
+            double tempPercent = Double.parseDouble(maxTipPercentInput.getText());
+
+            if(tempPercent < 0)
+            {
+                JOptionPane.showMessageDialog(rootPane, "Maximum tip percent must be a non-negative number.");
+                resetTipPercent();
+            }
+            else
+            {
+                if(tempPercent < minTipPercent)
+                {
+                    JOptionPane.showMessageDialog(rootPane, "Maximum tip percent cannot be less than the minimum tip percent.");
+                    resetTipPercent();
+                }
+                else
+                {
+                    maxTipPercent = tempPercent;
+                }
+            }
+        }
+        catch(NumberFormatException e)
+        {
+            JOptionPane.showMessageDialog(rootPane, "Maximum tip percent must be a non-negative number.");
+            resetTipPercent();
+        }
+    }//GEN-LAST:event_maxTipPercentInputActionPerformed
+
+    private void minTipPercentInputFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_minTipPercentInputFocusLost
+        try
+        {
+            double tempPercent = Double.parseDouble(minTipPercentInput.getText());
+
+            if(tempPercent < 0)
+            {
+                JOptionPane.showMessageDialog(rootPane, "Minimum tip percent must be a non-negative number.");
+                resetTipPercent();
+            }
+            else
+            {
+                if(tempPercent > maxTipPercent)
+                {
+                    JOptionPane.showMessageDialog(rootPane, "Minimum tip percent cannot exceed maximum tip percent.");
+                    resetTipPercent();
+                }
+                else
+                {
+                    minTipPercent = tempPercent;
+                }
+            }
+        }
+        catch(NumberFormatException e)
+        {
+            JOptionPane.showMessageDialog(rootPane, "Minimum tip percent must be a non-negative number.");
+            resetTipPercent();
+        }
+    }//GEN-LAST:event_minTipPercentInputFocusLost
+
+    private void maxTipPercentInputFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_maxTipPercentInputFocusLost
+        try
+        {
+            double tempPercent = Double.parseDouble(maxTipPercentInput.getText());
+
+            if(tempPercent < 0)
+            {
+                JOptionPane.showMessageDialog(rootPane, "Maximum tip percent must be a non-negative number.");
+                resetTipPercent();
+            }
+            else
+            {
+                if(tempPercent < minTipPercent)
+                {
+                    JOptionPane.showMessageDialog(rootPane, "Maximum tip percent cannot be less than the minimum tip percent.");
+                    resetTipPercent();
+                }
+                else
+                {
+                    maxTipPercent = tempPercent;
+                }
+            }
+        }
+        catch(NumberFormatException e)
+        {
+            JOptionPane.showMessageDialog(rootPane, "Maximum tip percent must be a non-negative number.");
+            resetTipPercent();
+        }
+    }//GEN-LAST:event_maxTipPercentInputFocusLost
+
+    private void qosSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_qosSliderStateChanged
+        updateTipRate();
+    }//GEN-LAST:event_qosSliderStateChanged
+    
+    private void resetTipPercent()
+    {
+        minTipPercentInput.setText("0.0");
+        maxTipPercentInput.setText("40.0");
+        minTipPercent = 0.0;
+        maxTipPercent = 40.0;
+        
+    }
+    private void updateTipRate(){
+        double tipRange = maxTipPercent - minTipPercent;
+        tipRate = (qosSlider.getValue() / 100.0) * tipRange + minTipPercent;
+        tipRateLabel.setText(df.format(tipRate));
+        updateBillAndTipTotal();
+    }
+    private void updateBillAndTipTotal(){
+    double tempTotal = billTotal;
+    tempTotal -= billDeductions;
+    tempTotal += tax;
+    double tipBase = tempTotal;
+    
+    if(!includeTax)
+    {
+        tipBase -= tax;
+    }
+    if(!includeDeductions)
+    {
+        tipBase += billDeductions;
+    }
+    
+    tipTotal = (tipRate / 100.0) * tipBase;
+    tempTotal += tipTotal;
+    
+    billAndTipTotalLabel.setText(df.format(tempTotal));
+    totalTipLabel.setText(df.format(tipTotal));
+    perPersonTipResultLabel.setText(df.format(tipTotal / numGuests));
+    }
+    
     private void updateConfigTab(){
     minTipPercentInput.setText(Double.toString(minTipPercent));
     maxTipPercentInput.setText(Double.toString(maxTipPercent));
@@ -481,7 +965,7 @@ public class MainGUI extends javax.swing.JFrame {
     private javax.swing.ButtonGroup includeTaxGroup;
     private javax.swing.JRadioButton includeTaxOffButton;
     private javax.swing.JRadioButton includeTaxOnButton;
-    private javax.swing.JSlider jSlider1;
+    private javax.swing.JLabel jLabel1;
     private java.awt.Label label1;
     private java.awt.Label label10;
     private java.awt.Label label11;
@@ -511,6 +995,7 @@ public class MainGUI extends javax.swing.JFrame {
     private javax.swing.JTextField numGuestsInput;
     private java.awt.Label perPersonTipLabel;
     private java.awt.Label perPersonTipResultLabel;
+    private javax.swing.JSlider qosSlider;
     private javax.swing.JTabbedPane tabPanes;
     private javax.swing.JTextField taxInput;
     private javax.swing.JPanel tipConfigPanel;
