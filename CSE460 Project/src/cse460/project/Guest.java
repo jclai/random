@@ -10,4 +10,30 @@ package cse460.project;
  */
 public class Guest {
     private String name;
+    private double tailoredPercent;
+    
+    public Guest()
+    {
+        name = "Guest";
+    }
+    
+    public void setTailoredPercent(double inputPercent)
+    {
+        tailoredPercent = inputPercent;
+    }
+    
+    public void setName(String inputName)
+    {
+        name = inputName;
+    }
+    
+    public double getPercent()
+    {
+        return tailoredPercent;
+    }
+    
+    public String getName()
+    {
+        return name;
+    }
 }

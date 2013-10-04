@@ -18,7 +18,6 @@ public class MainGUI extends javax.swing.JFrame {
      */
     private int currentTab;
     private int numGuests;
-    private int qualityOfService;
     private double billTotal;
     private double billDeductions;
     private double tax;
@@ -27,12 +26,13 @@ public class MainGUI extends javax.swing.JFrame {
     private double minTipPercent;
     private double maxTipPercent;
     private boolean includeTax;
+    private boolean isTailored;
     private boolean includeDeductions;
+    private Guest[] guestList;
     private DecimalFormat df;
     public MainGUI() {
         currentTab = 1;
         numGuests = 1;
-        qualityOfService = 50;
         billTotal = 0;
         billDeductions = 0;
         tax = 0;
@@ -42,7 +42,10 @@ public class MainGUI extends javax.swing.JFrame {
         maxTipPercent = 40;
         includeTax = false;
         includeDeductions = true;
+        isTailored = false;
         df = new DecimalFormat("0.00");
+        guestList = new Guest[99];
+        guestList[0] = new Guest();
         initComponents();
     }
 
@@ -271,7 +274,6 @@ public class MainGUI extends javax.swing.JFrame {
 
         label10.setText("Number of Guests");
 
-        qosSlider.setValue(50);
         qosSlider.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 qosSliderStateChanged(evt);
@@ -537,6 +539,10 @@ public class MainGUI extends javax.swing.JFrame {
         {
             updateBillAndTipTotal();
         }
+        else
+        {
+            updateGuestList();
+        }
         System.out.println(oldTab + " " + currentTab);
     }//GEN-LAST:event_tabPanesStateChanged
 
@@ -603,6 +609,7 @@ public class MainGUI extends javax.swing.JFrame {
             {
                 numGuests = tempGuests;
                 updateBillAndTipTotal();
+                updateGuestList();
             }
         }
         catch(NumberFormatException e)
@@ -733,6 +740,7 @@ public class MainGUI extends javax.swing.JFrame {
             {
                 numGuests = tempGuests;
                 updateBillAndTipTotal();
+                updateGuestList();
             }
         }
         catch(NumberFormatException e)
@@ -880,6 +888,30 @@ public class MainGUI extends javax.swing.JFrame {
         updateTipRate();
     }//GEN-LAST:event_qosSliderStateChanged
     
+    private void updateGuestList()
+    {
+        if(guestList[numGuests-1] == null)
+        {
+            for(int i = 0; i < numGuests; i++)
+            {
+                if(guestList[i] == null)
+                {
+                    guestList[i] = new Guest();
+                    javax.swing.JTextField text = new javax.swing.JTextField("test"); 
+                    tipTailoringPanel.setLayout(new java.awt.BorderLayout());
+                    text.setVisible(true);
+                    tipTailoringPanel.add(text); 
+                    tipTailoringPanel.revalidate(); 
+                    tipTailoringPanel.repaint(); 
+                }
+            }
+            //JOptionPane.showMessageDialog(rootPane, "need to update list!");
+        }
+        else
+        {
+            //JOptionPane.showMessageDialog(rootPane, "No need to update list!");
+        }
+    }
     private void resetTipPercent()
     {
         minTipPercentInput.setText("0.0");
